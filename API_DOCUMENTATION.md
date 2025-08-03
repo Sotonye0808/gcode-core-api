@@ -154,6 +154,9 @@ Requests must include a `request_signature` field with an HMAC-SHA256 signature 
 
 Submit user information and SVG signature data for storage.
 
+**Note**: Each user is limited to a maximum of 2 signatures. When submitting a new signature, if the user already has 2 signatures, the oldest one will be automatically deleted.
+
+
 #### Request Format
 
 ```json

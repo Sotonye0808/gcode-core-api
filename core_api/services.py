@@ -251,7 +251,8 @@ class UserDataService:
     @staticmethod
     def store_signature_data(user: User, svg_data: str) -> SignatureData:
         """
-        Store signature SVG data and generate G-code for a user.
+        Store signature data and generate g-code for a user with a maximum of 2 signatures.
+        If user already has 2 signatures, delete the oldest one.
         
         Args:
             user: User instance
@@ -280,7 +281,19 @@ class UserDataService:
                 'estimated_duration': f"{gcode_lines * 0.1:.1f} seconds"
             }
             
-            # Create signature data record
+           # Check existing signature count
+            existing_signatures = SignatureData.objects.filter(user=user).order_by('created_at')
+            
+            # If user has 2 or more signatures, delete the oldest ones to maintain limit of 2
+            if existing_signatures.count() >= 2:
+                # Get the most recent signature to keep
+                most_recent = existing_signatures.last()
+                
+                # Delete all signatures except the most recent one
+                SignatureData.objects.filter(user=user).exclude(id=most_recent.id).delete()
+            
+            # Create new signature
+
             signature_data = SignatureData.objects.create(
                 user=user,
                 svg_data=svg_data,
